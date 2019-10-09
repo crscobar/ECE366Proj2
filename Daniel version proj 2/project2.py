@@ -65,7 +65,6 @@ def sim(program):
 
 
         #srl
-
         elif fetch[0:6] == '000000' and fetch[26:32] == '000010':  # SRL
             PC += 4
             rs = int(fetch[6:11], 2)
@@ -76,7 +75,6 @@ def sim(program):
             register[rd] = rt/2**sh
 
         #lw
-
         elif fetch[0:6] == '100011':  # LW
             PC += 4
             rs = int(fetch[6:11], 2)
@@ -93,6 +91,57 @@ def sim(program):
             imm = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
 
             rt = rs & imm
+
+            #Jacob's Part
+
+        #sltu
+        elif fetch[0:6] == '000000' and fetch[26:32] == '101011':  # SLTU
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            if register[rs] < register[rt]:
+                register[rd] = 1
+            else:
+                register[rd] = 0
+           
+        #lw            
+        elif fetch[0:6] == '100011':  #LW
+            PC += 4
+            s = int(fetch[6:11], 2)
+            t = int(fetch[11:16], 2)
+            offset = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
+            offset = offset + register[s]
+            register[t] = mem[offset]
+
+        #and
+        elif fetch[0:6] == '000000' and fetch[26:32] == '100100':  #AND
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            register[rd] = register[rs] & register[rd]
+        
+        #sb
+        elif fetch[0:6] == '101000':  #SB
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            offset = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
+            offset = offset + register[rs]
+            mem[offset] = register[rt]
+
+        #lb
+        elif fetch[0:6] == '100000':  #LB
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            offset = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
+            offset = offset + register[rs]
+            register[rt] = mem[offset]
+
 
         else:
             # This is not implemented on purpose
