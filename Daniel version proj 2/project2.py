@@ -145,6 +145,7 @@ def sim(program):
 
         else:
             # This is not implemented on purpose
+            PC = PC + 4
             print('Not implemented')
 
     # Finished simulations. Let's print out some stats
@@ -152,8 +153,6 @@ def sim(program):
     print('Registers $8 - $23 ', register[8:23])
     print('Dynamic Instr Count ', DIC)
     print('Memory contents 0x2000 - 0x2050 ', mem[8192:8272])
-
-
 
 # Remember where each of the jump label is, and the target location
 def saveJumpLabel(asm,labelIndex, labelName):
@@ -411,7 +410,7 @@ def main():
 
     f.close()
     ########################################################################################
-    file = open('mips.asm')
+    file = open('mc.txt')
     program = []
     for line in file:
 
@@ -422,9 +421,10 @@ def main():
         if line[0] == '\n':
             continue
         line = line.replace('\n', '')
-        instr = line[2:]
-        instr = int(instr, 16)
-        instr = format(instr, '032b')
+        instr = line[:]
+
+        #instr = int(instr, 16)
+        #instr = format(instr, '032b')
         program.append(instr)  # since PC increment by 4 every cycle,
         program.append(0)  # let's align the program code by every
         program.append(0)  # 4 lines
