@@ -84,7 +84,7 @@ def sim(program):
             register[rt] = mem[rs + imm]
 
         #andi
-        elif fetch[0:6] == '000101':  # ANDI
+        elif fetch[0:6] == '001100':  # ANDI
             PC += 4
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)
@@ -157,13 +157,16 @@ def sim(program):
 # Remember where each of the jump label is, and the target location
 def saveJumpLabel(asm,labelIndex, labelName):
     lineCount = 0
+    countWithoutLabels = 0
     for line in asm:
         line = line.replace(" ","")
         if(line.count(":")):
             labelName.append(line[0:line.index(":")]) # append the label name
-            labelIndex.append(lineCount) # append the label's index
+            labelIndex.append(countWithoutLabels) # append the label's index
             asm[lineCount] = line[line.index(":")+1:]
+            countWithoutLabels -= 1
         lineCount += 1
+        countWithoutLabels += 1
     for item in range(asm.count('\n')): # Remove all empty lines '\n'
         asm.remove('\n')
 
@@ -173,15 +176,17 @@ def main():
     #######################################################################################
     labelIndex = []
     labelName = []
-    f = open("mc.txt", "w+")
+    f = open("mc1.txt", "w+")
     h = open("mips.asm", "r")
     asm = h.readlines()
+    currentline = 0;
     for item in range(asm.count('\n')):  # Remove all empty lines '\n'
         asm.remove('\n')
 
     saveJumpLabel(asm, labelIndex, labelName)  # Save all jump's destinations
 
     for line in asm:
+
         line = line.replace("\n", "")  # Removes extra chars
         line = line.replace("$", "")
         line = line.replace(" ", "")
@@ -218,6 +223,8 @@ def main():
         #
         # ~ ~ ~ ~ ~ ~ ~ MY WORK
 
+
+
         # = = = = ADDIU = = = = = = = = (I)
         if (line[0:5] == "addiu"):
             line = line.replace("addiu", "")  # delete the addiu from the string.
@@ -227,17 +234,15 @@ def main():
             rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             imm = format(int(line[2]), '016b') if (int(line[2]) > 0) else format(65536 + int(line[2]), '016b')
             f.write(str('001001') + str(rs) + str(rt) + str(imm) + '\n')
-
-        # = = = = ADDI = = = = = = (I)
+            currentline += 1
         elif (line[0:4] == "addi"):
             line = line.replace("addi", "")
             line = line.split(",")
-            imm = format(int(line[2]), '016b') if (int(line[2]) > 0) else format(65536 + int(line[2]), '016b')
+            imm = format(int(line[2]), '016b') if (int(line[2]) >= 0) else format(65536 + int(line[2]), '016b')
             rs = format(int(line[1]), '05b')
             rt = format(int(line[0]), '05b')
             f.write(str('001000') + str(rs) + str(rt) + str(imm) + '\n')
-
-
+            currentline += 1
         # = = = = ADD = = = = = = (R)
         elif (line[0:3] == "add"):
             line = line.replace("add", "")
@@ -246,6 +251,18 @@ def main():
             rs = format(int(line[1]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
             rt = format(int(line[2]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
             f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000100000') + '\n')
+            currentline += 1
+            # the last part is actually accounting for sh = 00000 (5 zeroes)
+            # and 6 bits for the func (0x20) = 100000
+
+        elif (line[0:3] == "sub"):
+            line = line.replace("sub", "")
+            line = line.split(",")
+            rd = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            rs = format(int(line[1]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            rt = format(int(line[2]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000100010') + '\n')
+            currentline += 1
             # the last part is actually accounting for sh = 00000 (5 zeroes)
             # and 6 bits for the func (0x20) = 100000
 
@@ -256,8 +273,7 @@ def main():
             rs = format(int(line[0]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             rt = format(int(line[1]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
             f.write(str('000000') + str(rs) + str(rt) + str('00000') + str('00000') + str('011001') + '\n')
-
-
+            currentline += 1
         # = = = = MULT = = = = = = = = (R)
         elif (line[0:4] == "mult"):
             line = line.replace("mult", "")
@@ -265,7 +281,7 @@ def main():
             rs = format(int(line[0]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             rt = format(int(line[1]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
             f.write(str('000000') + str(rs) + str(rt) + str('00000') + str('00000') + str('011000') + '\n')
-
+            currentline += 1
 
         # = = = = SRL = = = = = = = = (R)
         elif (line[0:3] == "srl"):
@@ -275,14 +291,13 @@ def main():
             rt = format(int(line[1]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
             sh = format(int(line[2]), '05b')  # make element 3 in the set, 'line' an int of 5 bits. (sh)
             f.write(str('000000') + str('00000') + str(rt) + str(rd) + str(sh) + str('000010') + '\n')
-
+            currentline += 1
             # question about splitting in python for the paranthesees?
 
         # = = = = LB = = = = = = = = = (I)
         elif (line[0:2] == "lb"):
             line = line.replace(")", "")  # remove the ) paran entirely.
             line = line.replace("(", ",")  # replace ( left paren with comma
-
             line = line.replace("lb", "")
             line = line.split(
                 ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
@@ -290,27 +305,24 @@ def main():
             imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
             rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             f.write(str('100000') + str(rs) + str(rt) + str(imm) + '\n')
-
+            currentline += 1
 
         # = = = = SB = = = = = = = = = (I)
         elif (line[0:2] == "sb"):
             line = line.replace(")", "")  # remove the ) paran entirely.
             line = line.replace("(", ",")  # replace ( left paren with comma
-
             line = line.replace("sb", "")
             line = line.split(
                 ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
-
             rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
             imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
             rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             f.write(str('101000') + str(rs) + str(rt) + str(imm) + '\n')
-
+            currentline += 1
         # = = = = LW = = = = = = = = = (I)
         elif (line[0:2] == "lw"):
             line = line.replace(")", "")  # remove the ) paran entirely.
             line = line.replace("(", ",")  # replace ( left paren with comma
-
             line = line.replace("lw", "")
             line = line.split(
                 ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
@@ -318,12 +330,11 @@ def main():
             imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
             rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             f.write(str('100011') + str(rs) + str(rt) + str(imm) + '\n')
-
+            currentline += 1
         # = = = = SW = = = = = = = = = (I)
         elif (line[0:2] == "sw"):
             line = line.replace(")", "")  # remove the ) paran entirely.
             line = line.replace("(", ",")  # replace ( left paren with comma
-
             line = line.replace("sw", "")
             line = line.split(
                 ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
@@ -331,9 +342,61 @@ def main():
             imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
             rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             f.write(str('101011') + str(rs) + str(rt) + str(imm) + '\n')
+            currentline += 1
+        # = = = = ORI = = = = = = = = = (I)
+        elif (line[0:3] == "ori"):
+            line = line.replace("ori", "")
+            line = line.split(
+                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
+            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
+            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
+            rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
+            f.write(str('001101') + str(rs) + str(rt) + str(imm) + '\n')
+            currentline += 1
 
-
-
+            # = = = = ANDI = = = = = = = = = (I)
+        elif (line[0:4] == "andi"):
+            line = line.replace("andi", "")
+            line = line.split(
+                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
+            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
+            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
+            rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
+            f.write(str('001100') + str(rs) + str(rt) + str(imm) + '\n')
+            currentline += 1
+            # = = = = AND = = = = = = = = = (R)
+        elif (line[0:4] == "and"):
+            line = line.replace("and", "")
+            line = line.split(
+                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
+            rd = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            rs = format(int(line[1]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            rt = format(int(line[2]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('100100') + '\n')
+            currentline += 1
+            # = = = = MFHI = = = = = = = = (R)
+        elif (line[0:4] == "mfhi"):
+            line = line.replace("mfhi", "")
+            line = line.split(",")
+            rd = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            f.write(str('000000') + str('00000') + str('00000') + str(rd) + str('00000') + str('010000') + '\n')
+            currentline += 1
+            # = = = = MFLO = = = = = = = = (R)
+        elif (line[0:4] == "mflo"):
+            line = line.replace("mflo", "")
+            line = line.split(",")
+            rd = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            f.write(str('000000') + str('00000') + str('00000') + str(rd) + str('00000') + str('010010') + '\n')
+            currentline += 1
+            # = = = = XOR = = = = = = = = (R)
+        elif (line[0:3] == "xor"):
+            line = line.replace("xor", "")
+            line = line.split(",")
+            rd = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            rs = format(int(line[1]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            rt = format(int(line[2]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('100110') + '\n')
+            currentline += 1
         # = = = = BEQ = = = = = = = = = (I)
         elif (line[0:3] == "beq"):
             line = line.replace("beq", "")
@@ -343,11 +406,15 @@ def main():
             rs = format(int(line[1]), '05b')
             # imm = format(int(line[2]),'016b') if (int(line[2]) > 0) else format(65536 + int(line[2]),'016b')
             for i in range(len(labelName)):
-                if (labelName[i] == line[0]):
-                    f.write(str('000101') + str(rs) + str(rt) + str(format(int(labelIndex[i]), '016b')) + '\n')
-
-            # f.write(str('000100') + str(rs) + str(rt) + str(imm) + '\n')
-
+                if (labelName[i] == line[2]):
+                    if (labelIndex[i] < currentline + 1):
+                        #imm = (labelIndex[i]-(i)) - currentline -1 + 65536
+                        imm = labelIndex[i] - (currentline + 1) + 65536
+                    else:
+                        #imm = (labelIndex[i] - i) - currentline -1
+                        imm = labelIndex[i] - (currentline + 1)
+            f.write(str('000100') + str(rs) + str(rt) + str(format(imm,'016b')) + '\n')
+            currentline += 1
 
         # = = = = BNE = = = = = = = = = (I)
         elif (line[0:3] == "bne"):
@@ -358,12 +425,13 @@ def main():
             rs = format(int(line[1]), '05b')
             # imm = format(int(line[2]),'016b') if (int(line[2]) > 0) else format(65536 + int(line[2]),'016b')
             for i in range(len(labelName)):
-                if (labelName[i] == line[0]):
-                    f.write(str('000101') + str(rs) + str(rt) + str(format(int(labelIndex[i]), '016b')) + '\n')
-
-            # f.write(str('000101') + str(rs) + str(rt) + str(imm) + '\n')
-
-
+                if (labelName[i] == line[2]):
+                    if (labelIndex[i] < currentline + 1):
+                        imm = labelIndex[i] - (currentline + 1) + 65536
+                    else:
+                        imm = labelIndex[i] - (currentline + 1)
+            f.write(str('000101') + str(rs) + str(rt) + str(format(imm,'016b')) + '\n')
+            currentline += 1
         # = = = = SLTU = = = = = = = = = (R)
         elif (line[0:4] == "sltu"):
             line = line.replace("sltu", "")
@@ -371,11 +439,10 @@ def main():
             rd = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
             rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             rt = format(int(line[2]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
-
             for i in range(len(labelName)):
                 if (labelName[i] == line[0]):
                     f.write(str('000101') + str(rs) + str(rt) + str(format(int(labelIndex[i]), '016b')) + '\n')
-
+            currentline += 1
             # f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('101011') + '\n')
 
 
@@ -387,14 +454,13 @@ def main():
             rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             rt = format(int(line[2]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
             f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('101010') + '\n')
-
+            currentline += 1
 
         # = = = = JUMP = = = = = = (J)
 
         elif (line[0:1] == "j"):
             line = line.replace("j", "")
             line = line.split(",")
-
             # Since jump instruction has 2 options:
             # 1) jump to a label
             # 2) jump to a target (integer)
@@ -402,15 +468,18 @@ def main():
 
             if (line[0].isdigit()):  # First,test to see if it's a label or a integer
                 f.write(str('000010') + str(format(int(line[0]), '026b')) + '\n')
+                currentline += 1
 
             else:  # Jumping to label
                 for i in range(len(labelName)):
                     if (labelName[i] == line[0]):
                         f.write(str('000010') + str(format(int(labelIndex[i]), '026b')) + '\n')
+                        currentline += 1
+
 
     f.close()
     ########################################################################################
-    file = open('mc.txt')
+    file = open('mc1.txt')
     program = []
     for line in file:
 
