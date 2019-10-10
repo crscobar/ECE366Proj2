@@ -40,5 +40,5 @@ skip2:
 addi $16, $0, 0
 addi $17, $0, 0
 addi $13, $13, 1
-addi $10, $11, -1
+addi $10, $10, -1
 bne $10, $0, loop2

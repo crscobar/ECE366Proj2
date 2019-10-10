@@ -21,14 +21,20 @@ def sim(program):
             s = int(fetch[6:11], 2)
             t = int(fetch[11:16], 2)
             imm = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
+            print(register[s])
+
             register[t] = register[s] + imm
+            print(register[t])
 
         elif fetch[0:6] == '000000' and fetch[21:32] == '00000100010':  # SUB
             PC += 4
             s = int(fetch[6:11], 2)
             t = int(fetch[11:16], 2)
             d = int(fetch[16:21], 2)
+            print(register[s])
+            print(register[t])
             register[d] = register[s] - register[t]
+            print(register[d])
 
         elif fetch[0:6] == '000100':  # BEQ
             PC += 4
@@ -38,13 +44,16 @@ def sim(program):
             # Compare the registers and decide if jumping or not
             if register[s] == register[t]:
                 PC += imm * 4
+                if (imm < 0):
+                    finished = False
+
 
         elif fetch[0:6] == '001101':  # ORI
             PC += 4
             s = int(fetch[6:11], 2)
             t = int(fetch[11:16], 2)
             imm = int(fetch[16:], 2)
-            register[t] = register[s] | imm
+            register[t] = int(register[s]) | imm
 
         elif fetch[0:6] == '101011':  # SW
             PC += 4
@@ -62,6 +71,8 @@ def sim(program):
             # Compare the registers and decide if jumping or not
             if register[rs] != register[rt]:
                 PC += imm * 4
+                if (imm < 0):
+                    finished = False
 
 
         #srl
@@ -71,8 +82,10 @@ def sim(program):
             rt = int(fetch[11:16], 2)
             rd = int(fetch[16:21], 2)
             sh = int(fetch[21:26],2)
-
-            register[rd] = rt/2**sh
+            print(register[sh])
+            print(register[rt])
+            register[rd] = int(register[rt]/2**sh)
+            print(register[rd])
 
         #lw
         elif fetch[0:6] == '100011':  # LW
@@ -90,8 +103,9 @@ def sim(program):
             rt = int(fetch[11:16], 2)
             imm = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
 
-            rt = rs & imm
-
+            register[rt] = int(register[rs]) & imm
+            print(register[rs])
+            print(register[rt])
             #Jacob's Part
 
         #sltu
@@ -349,8 +363,8 @@ def main():
             line = line.split(
                 ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
             rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
-            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
-            rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
+            imm = format(int(line[2]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
+            rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             f.write(str('001101') + str(rs) + str(rt) + str(imm) + '\n')
             currentline += 1
 
@@ -360,8 +374,8 @@ def main():
             line = line.split(
                 ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
             rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
-            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
-            rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
+            imm = format(int(line[2]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
+            rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             f.write(str('001100') + str(rs) + str(rt) + str(imm) + '\n')
             currentline += 1
             # = = = = AND = = = = = = = = = (R)
