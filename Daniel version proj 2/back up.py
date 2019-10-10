@@ -62,7 +62,7 @@ def sim(program):
             offset = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
             offset = offset + register[s]
             mem[offset] = register[t]
-        #bne
+        # bne
         elif fetch[0:6] == '000101':  # BNE
             PC += 4
             rs = int(fetch[6:11], 2)
@@ -75,19 +75,19 @@ def sim(program):
                     finished = False
 
 
-        #srl
+        # srl
         elif fetch[0:6] == '000000' and fetch[26:32] == '000010':  # SRL
             PC += 4
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)
             rd = int(fetch[16:21], 2)
-            sh = int(fetch[21:26],2)
+            sh = int(fetch[21:26], 2)
             print(register[sh])
             print(register[rt])
-            register[rd] = int(register[rt]/2**sh)
+            register[rd] = int(register[rt] / 2 ** sh)
             print(register[rd])
 
-        #lw
+        # lw
         elif fetch[0:6] == '100011':  # LW
             PC += 4
             rs = int(fetch[6:11], 2)
@@ -96,7 +96,7 @@ def sim(program):
 
             register[rt] = mem[rs + imm]
 
-        #andi
+        # andi
         elif fetch[0:6] == '001100':  # ANDI
             PC += 4
             rs = int(fetch[6:11], 2)
@@ -106,9 +106,9 @@ def sim(program):
             register[rt] = int(register[rs]) & imm
             print(register[rs])
             print(register[rt])
-            #Jacob's Part
+            # Jacob's Part
 
-        #sltu
+        # sltu
         elif fetch[0:6] == '000000' and fetch[26:32] == '101011':  # SLTU
             PC += 4
             rs = int(fetch[6:11], 2)
@@ -119,9 +119,9 @@ def sim(program):
                 register[rd] = 1
             else:
                 register[rd] = 0
-           
-        #lw            
-        elif fetch[0:6] == '100011':  #LW
+
+        # lw
+        elif fetch[0:6] == '100011':  # LW
             PC += 4
             s = int(fetch[6:11], 2)
             t = int(fetch[11:16], 2)
@@ -129,17 +129,17 @@ def sim(program):
             offset = offset + register[s]
             register[t] = mem[offset]
 
-        #and
-        elif fetch[0:6] == '000000' and fetch[26:32] == '100100':  #AND
+        # and
+        elif fetch[0:6] == '000000' and fetch[26:32] == '100100':  # AND
             PC += 4
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)
             rd = int(fetch[16:21], 2)
 
             register[rd] = register[rs] & register[rd]
-        
-        #sb
-        elif fetch[0:6] == '101000':  #SB
+
+        # sb
+        elif fetch[0:6] == '101000':  # SB
             PC += 4
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)
@@ -147,8 +147,8 @@ def sim(program):
             offset = offset + register[rs]
             mem[offset] = register[rt]
 
-        #lb
-        elif fetch[0:6] == '100000':  #LB
+        # lb
+        elif fetch[0:6] == '100000':  # LB
             PC += 4
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)
@@ -156,28 +156,6 @@ def sim(program):
             offset = offset + register[rs]
             register[rt] = mem[offset]
 
-#
-            #if rs has 5 ones in a row then rt equals 1
-            #else rt equal 0
-       # elif fetch[0:6] == '011011':  #COMP
-        #    PC += 4
-         #   rs = int(fetch[6:11], 2)
-          #  rt = int(fetch[11:16], 2)
-           # test1 = format(248, '08b')
-           # test2 = format(124, '08b')
-           # test3 = format(62, '08b')
-          #  test4 = format(31, '08b')
-          #  if (register[rs] & test1) == test1:
-           #     register[rt] = 1
-           # elif (register[rs] & test2) == test2:
-           #     register[rt] = 1
-           # elif (register[rs] & test3) == test3:
-           #     register[rt] = 1
-           # elif (register[rs] & test4) == test4:
-            #    register[rt] = 1
-           # else:
-            #    register[rt] = 0
-#
 
         else:
             # This is not implemented on purpose
@@ -190,20 +168,21 @@ def sim(program):
     print('Dynamic Instr Count ', DIC)
     print('Memory contents 0x2000 - 0x2050 ', mem[8192:8272])
 
+
 # Remember where each of the jump label is, and the target location
-def saveJumpLabel(asm,labelIndex, labelName):
+def saveJumpLabel(asm, labelIndex, labelName):
     lineCount = 0
     countWithoutLabels = 0
     for line in asm:
-        line = line.replace(" ","")
-        if(line.count(":")):
-            labelName.append(line[0:line.index(":")]) # append the label name
-            labelIndex.append(countWithoutLabels) # append the label's index
-            asm[lineCount] = line[line.index(":")+1:]
+        line = line.replace(" ", "")
+        if (line.count(":")):
+            labelName.append(line[0:line.index(":")])  # append the label name
+            labelIndex.append(countWithoutLabels)  # append the label's index
+            asm[lineCount] = line[line.index(":") + 1:]
             countWithoutLabels -= 1
         lineCount += 1
         countWithoutLabels += 1
-    for item in range(asm.count('\n')): # Remove all empty lines '\n'
+    for item in range(asm.count('\n')):  # Remove all empty lines '\n'
         asm.remove('\n')
 
 
@@ -258,8 +237,6 @@ def main():
         #
         #
         # ~ ~ ~ ~ ~ ~ ~ MY WORK
-
-
 
         # = = = = ADDIU = = = = = = = = (I)
         if (line[0:5] == "addiu"):
@@ -444,12 +421,12 @@ def main():
             for i in range(len(labelName)):
                 if (labelName[i] == line[2]):
                     if (labelIndex[i] < currentline + 1):
-                        #imm = (labelIndex[i]-(i)) - currentline -1 + 65536
+                        # imm = (labelIndex[i]-(i)) - currentline -1 + 65536
                         imm = labelIndex[i] - (currentline + 1) + 65536
                     else:
-                        #imm = (labelIndex[i] - i) - currentline -1
+                        # imm = (labelIndex[i] - i) - currentline -1
                         imm = labelIndex[i] - (currentline + 1)
-            f.write(str('000100') + str(rs) + str(rt) + str(format(imm,'016b')) + '\n')
+            f.write(str('000100') + str(rs) + str(rt) + str(format(imm, '016b')) + '\n')
             currentline += 1
 
         # = = = = BNE = = = = = = = = = (I)
@@ -466,7 +443,7 @@ def main():
                         imm = labelIndex[i] - (currentline + 1) + 65536
                     else:
                         imm = labelIndex[i] - (currentline + 1)
-            f.write(str('000101') + str(rs) + str(rt) + str(format(imm,'016b')) + '\n')
+            f.write(str('000101') + str(rs) + str(rt) + str(format(imm, '016b')) + '\n')
             currentline += 1
         # = = = = SLTU = = = = = = = = = (R)
         elif (line[0:4] == "sltu"):
@@ -492,21 +469,6 @@ def main():
             f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('101010') + '\n')
             currentline += 1
 
-
-        # = = = = COMP = = = = = = (I)
-        elif (line[0:4] == "comp"):
-            line = line.replace("comp", "")  # delete the addiu from the string.
-            line = line.split(
-                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
-            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
-            rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
-            imm = format(0, '016b')
-            f.write(str('011011') + str(rs) + str(rt) + str(imm) + '\n')
-            currentline += 1
-
-
-
-
         # = = = = JUMP = = = = = = (J)
 
         elif (line[0:1] == "j"):
@@ -527,7 +489,6 @@ def main():
                         f.write(str('000010') + str(format(int(labelIndex[i]), '026b')) + '\n')
                         currentline += 1
 
-
     f.close()
     ########################################################################################
     file = open('mc1.txt')
@@ -543,8 +504,8 @@ def main():
         line = line.replace('\n', '')
         instr = line[:]
 
-        #instr = int(instr, 16)
-        #instr = format(instr, '032b')
+        # instr = int(instr, 16)
+        # instr = format(instr, '032b')
         program.append(instr)  # since PC increment by 4 every cycle,
         program.append(0)  # let's align the program code by every
         program.append(0)  # 4 lines
