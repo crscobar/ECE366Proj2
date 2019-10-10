@@ -23,8 +23,8 @@
 # $22
 # $23 
 
-lui $8, 0xDE8A
-ori $8, $8, 0xAB39
+lui $8, 0xFA19
+ori $8, $8, 0xE366
 
 
 addi $9, $0, 1
@@ -97,7 +97,7 @@ ori $10, $0, 0x2021
 loop_2:
 	lbu $18, 0($10)
 
-	slt $17, $18, $8	#if new bit($18) < highest($8), then $17=1
+	sltu $17, $18, $8	#if new bit($18) < highest($8), then $17=1
 	bne $17, $0, skip	#skips if $17 != 0
 
 	addi $8, $18, 0
