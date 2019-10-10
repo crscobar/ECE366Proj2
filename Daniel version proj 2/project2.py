@@ -156,6 +156,27 @@ def sim(program):
             offset = offset + register[rs]
             register[rt] = mem[offset]
 
+            #if rs has 5 ones in a row then rt equals 1
+            #else rt equal 0
+        elif fetch[0:6] == '011011':  #COMP
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            test1 = format(248, '08b')
+            test2 = format(124, '08b')
+            test3 = format(62, '08b')
+            test4 = format(31, '08b')
+            if (register[rs] & test1) == test1:
+                register[rt] = 1
+            elif (register[rs] & test2) == test2:
+                register[rt] = 1
+            elif (register[rs] & test3) == test3:
+                register[rt] = 1
+            elif (register[rs] & test4) == test4:
+                register[rt] = 1
+            else:
+                register[rt] = 0
+
 
         else:
             # This is not implemented on purpose
@@ -469,6 +490,21 @@ def main():
             rt = format(int(line[2]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
             f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('101010') + '\n')
             currentline += 1
+
+
+        # = = = = COMP = = = = = = (I)
+        elif (line[0:4] == "comp"):
+            line = line.replace("comp", "")  # delete the addiu from the string.
+            line = line.split(
+                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
+            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
+            rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
+            imm = format(0, '016b')
+            f.write(str('011011') + str(rs) + str(rt) + str(imm) + '\n')
+            currentline += 1
+
+
+
 
         # = = = = JUMP = = = = = = (J)
 
