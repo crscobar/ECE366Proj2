@@ -351,7 +351,7 @@ def main():
     labelIndex = []
     labelName = []
     f = open("mc1.txt", "w+")
-    h = open("Hash-Mips-Plus.asm", "r")
+    h = open("Project1Dan.asm", "r")
     asm = h.readlines()
     currentline = 0;
     for item in range(asm.count('\n')):  # Remove all empty lines '\n'
