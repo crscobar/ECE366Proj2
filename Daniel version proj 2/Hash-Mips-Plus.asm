@@ -56,3 +56,5 @@ addi $14, $14, 0
 addi $18, $18, 0
 loop_pattern:
 
+addi $22, $0, 8200
+sw $21, 0($22)
