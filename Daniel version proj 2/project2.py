@@ -258,10 +258,40 @@ def sim(program):
             print('Not implemented')
 
     # Finished simulations. Let's print out some stats
+   # print('***Simulation finished***')
+    #print('Registers $8 - $23 ', register[8:23])
+    #print('Dynamic Instr Count ', DIC)
+    #print('Memory contents 0x2000 - 0x2050 ', mem[8192:8272])
+
+    # Finished simulations. Let's print out some stats
     print('***Simulation finished***')
-    print('Registers $8 - $23 ', register[8:23])
+
+    print('                   _______________________________________________________________________________________')
+    print('Registers $0 - $7: | {}[$0] | {}[$1] | {}[$2] | {}[$3] | {}[$4] | {}[$5] | {}[$6] | {}[$7] |'.format(
+        register[0], register[1], register[2], register[3], register[4], register[5], register[6], register[7]))
+    print('                   ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
+
+    print('                    ______________________________________________________________________________________')
+    print('Registers $8 - $15: | {}[$8] | {}[$9] | {}[$10] | {}[$11] | {}[$12] | {}[$13] | {}[$14] | {}[$15] |'.format(
+        register[8], register[9], register[10], register[11], register[12], register[13], register[14], register[15]))
+    print('                    ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
+
+    print('                     _____________________________________________________________________________________')
+    print(
+        'Registers $16 - $23: | {}[$16] | {}[$17] | {}[$18] | {}[$19] | {}[$20] | {}[$21] | {}[$22] | {}[$23] |'.format(
+            register[16], register[17], register[18], register[19], register[20], register[21], register[22],
+            register[23]))
+    print('                     ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
+
+    print('                      __________________________________')
+    print('Registers lo, hi, PC: | {}[lo] | {}[$hi] | {}[$pc] |'.format(register[24], register[25], register[26]))
+    print('                      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
+
     print('Dynamic Instr Count ', DIC)
-    print('Memory contents 0x2000 - 0x2050 ', mem[8192:8272])
+    print('Memory contents 0x2000 - 0x20FF ', mem[8192:8448])
+
+    input()
+
 
 # Remember where each of the jump label is, and the target location
 def saveJumpLabel(asm,labelIndex, labelName):
