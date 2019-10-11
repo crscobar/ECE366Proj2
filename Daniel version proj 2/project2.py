@@ -23,7 +23,7 @@ def sim(program):
             imm = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
             print(register[rs])
 
-            register[rt] = register[s] + imm
+            register[rt] = register[rs] + imm
             print(register[rt])
 
         elif fetch[0:6] == '000000' and fetch[21:32] == '00000100000':  # ADD
@@ -31,20 +31,18 @@ def sim(program):
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)
             rd = int(fetch[16:21], 2)
-            print(register[s])
-            print(register[t])
+
             register[rd] = register[rs] + register[rt]
-            print(register[rd])
+
 
         elif fetch[0:6] == '000000' and fetch[21:32] == '00000100010':  # SUB
             PC += 4
-            s = int(fetch[6:11], 2)
-            t = int(fetch[11:16], 2)
-            d = int(fetch[16:21], 2)
-            print(register[s])
-            print(register[t])
-            register[d] = register[s] - register[t]
-            print(register[d])
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            register[rd] = register[rs] - register[rt]
+
 
         elif fetch[0:6] == '000100':  # BEQ
             PC += 4
@@ -67,11 +65,11 @@ def sim(program):
 
         elif fetch[0:6] == '101011':  # SW
             PC += 4
-            s = int(fetch[6:11], 2)
-            t = int(fetch[11:16], 2)
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
             offset = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
-            offset = offset + register[s]
-            mem[offset] = register[t]
+            offset = offset + register[rs]
+            mem[offset] = register[rt]
         #bne
         elif fetch[0:6] == '000101':  # BNE
             PC += 4
@@ -288,7 +286,7 @@ def main():
     labelIndex = []
     labelName = []
     f = open("mc1.txt", "w+")
-    h = open("mips.asm", "r")
+    h = open("Project1Dan.asm", "r")
     asm = h.readlines()
     currentline = 0;
     for item in range(asm.count('\n')):  # Remove all empty lines '\n'
