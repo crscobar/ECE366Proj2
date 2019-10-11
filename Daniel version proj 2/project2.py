@@ -13,6 +13,7 @@ def sim(program):
     while (not (finished)):
         if PC == len(program) - 4:
             finished = True
+            register[26] = PC
         fetch = program[PC]
         DIC += 1
         # print(hex(int(fetch,2)), PC)
@@ -31,10 +32,19 @@ def sim(program):
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)
             rd = int(fetch[16:21], 2)
-
+            print(register[rs])
+            print(register[rt])
             register[rd] = register[rs] + register[rt]
+            print(register[rd])
 
+            # LUI
+        elif fetch[0:6] == '001111':  # LUI (I) || WORKING
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            imm = int(fetch[16:], 2)
 
+            register[rt] = imm << 16
         elif fetch[0:6] == '000000' and fetch[21:32] == '00000100010':  # SUB
             PC += 4
             rs = int(fetch[6:11], 2)
@@ -70,6 +80,7 @@ def sim(program):
             offset = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
             offset = offset + register[rs]
             mem[offset] = register[rt]
+            print(mem[offset])
         #bne
         elif fetch[0:6] == '000101':  # BNE
             PC += 4
