@@ -18,31 +18,39 @@ def sim(program):
         # print(hex(int(fetch,2)), PC)
         if fetch[0:6] == '001000':  # ADDI
             PC += 4
-            s = int(fetch[6:11], 2)
-            t = int(fetch[11:16], 2)
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
             imm = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
-            print(register[s])
+            print(register[rs])
 
-            register[t] = register[s] + imm
-            print(register[t])
+            register[rt] = register[rs] + imm
+            print(register[rt])
+
+        elif fetch[0:6] == '000000' and fetch[21:32] == '00000100000':  # ADD
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            register[rd] = register[rs] + register[rt]
+
 
         elif fetch[0:6] == '000000' and fetch[21:32] == '00000100010':  # SUB
             PC += 4
-            s = int(fetch[6:11], 2)
-            t = int(fetch[11:16], 2)
-            d = int(fetch[16:21], 2)
-            print(register[s])
-            print(register[t])
-            register[d] = register[s] - register[t]
-            print(register[d])
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            register[rd] = register[rs] - register[rt]
+
 
         elif fetch[0:6] == '000100':  # BEQ
             PC += 4
-            s = int(fetch[6:11], 2)
-            t = int(fetch[11:16], 2)
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
             imm = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
             # Compare the registers and decide if jumping or not
-            if register[s] == register[t]:
+            if register[rs] == register[rt]:
                 PC += imm * 4
                 if (imm < 0):
                     finished = False
@@ -50,18 +58,18 @@ def sim(program):
 
         elif fetch[0:6] == '001101':  # ORI
             PC += 4
-            s = int(fetch[6:11], 2)
-            t = int(fetch[11:16], 2)
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
             imm = int(fetch[16:], 2)
-            register[t] = int(register[s]) | imm
+            register[rt] = int(register[rs]) | imm
 
         elif fetch[0:6] == '101011':  # SW
             PC += 4
-            s = int(fetch[6:11], 2)
-            t = int(fetch[11:16], 2)
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
             offset = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
-            offset = offset + register[s]
-            mem[offset] = register[t]
+            offset = offset + register[rs]
+            mem[offset] = register[rt]
         # bne
         elif fetch[0:6] == '000101':  # BNE
             PC += 4
@@ -82,10 +90,9 @@ def sim(program):
             rt = int(fetch[11:16], 2)
             rd = int(fetch[16:21], 2)
             sh = int(fetch[21:26], 2)
-            print(register[sh])
-            print(register[rt])
+
             register[rd] = int(register[rt] / 2 ** sh)
-            print(register[rd])
+
 
         # lw
         elif fetch[0:6] == '100011':  # LW
@@ -156,6 +163,93 @@ def sim(program):
             offset = offset + register[rs]
             register[rt] = mem[offset]
 
+            # LhU
+        elif fetch[0:6] == '100101':  # LhU (I) || Bugged?
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            imm = int(fetch[16:], 2)
+            imm = imm + register[rs]
+            register[rt] = (mem[imm]) & 65535
+            # LBU
+        elif fetch[0:6] == '100100':  # LBU (I) || Bugged?
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            imm = int(fetch[16:], 2)
+            imm = imm + register[rs]
+            register[rt] = (mem[imm]) & 255
+            # MULTU
+        elif fetch[0:6] == '000000' and fetch[21:32] == '00000011001':  # MULTU (R) || WORKING
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            tempVar = register[rs] * register[rt]
+            tempLo = format(tempVar, '064b')
+            tempLo = tempVar & 0x00000000FFFFFFFF
+            tempHi = tempVar >> 32
+
+            register[24] = int(tempLo)
+            register[25] = int(tempHi)
+
+            # MFHI
+        elif fetch[0:6] == '000000' and fetch[21:32] == '00000010000':  # MFHI (R) || WORKING
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            register[rd] = register[25]  # register 2 saved for hi
+            # MFLO
+        elif fetch[0:6] == '000000' and fetch[21:32] == '00000010010':  # MFLO (R) || WORKING
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            register[rd] = register[24]  # register 1 saved for lo
+            # XOR
+        elif fetch[0:6] == '000000' and fetch[21:32] == '00000100110':  # XOR (R) || WORKING
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            register[rd] = register[rs] ^ register[rt]  # ^ is XOR in python
+
+            # LBU
+        elif fetch[0:6] == '100100':  # LBU (I) || Bugged?
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            imm = int(fetch[16:], 2)
+            imm = imm + register[rs]
+            register[rt] = mem[imm]
+
+        #
+        # if rs has 5 ones in a row then rt equals 1
+        # else rt equal 0
+        # elif fetch[0:6] == '011011':  #COMP
+        #    PC += 4
+        #   rs = int(fetch[6:11], 2)
+        #  rt = int(fetch[11:16], 2)
+        # test1 = format(248, '08b')
+        # test2 = format(124, '08b')
+        # test3 = format(62, '08b')
+        #  test4 = format(31, '08b')
+        #  if (register[rs] & test1) == test1:
+        #     register[rt] = 1
+        # elif (register[rs] & test2) == test2:
+        #     register[rt] = 1
+        # elif (register[rs] & test3) == test3:
+        #     register[rt] = 1
+        # elif (register[rs] & test4) == test4:
+        #    register[rt] = 1
+        # else:
+        #    register[rt] = 0
+        #
 
         else:
             # This is not implemented on purpose
@@ -192,7 +286,7 @@ def main():
     labelIndex = []
     labelName = []
     f = open("mc1.txt", "w+")
-    h = open("mips.asm", "r")
+    h = open("Project1Dan.asm", "r")
     asm = h.readlines()
     currentline = 0;
     for item in range(asm.count('\n')):  # Remove all empty lines '\n'
@@ -307,6 +401,43 @@ def main():
             currentline += 1
             # question about splitting in python for the paranthesees?
 
+        elif (line[0:3] == "lbu"):
+            line = line.replace(")", "")  # remove the ) paran entirely.
+            line = line.replace("(", ",")  # replace ( left paren with comma
+            line = line.replace("lbu", "")
+            line = line.split(
+                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
+            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
+            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
+            rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
+            f.write(str('100100') + str(rs) + str(rt) + str(imm) + '\n')
+            currentline += 1
+
+            # = = = = LB = = = = = = = = = (I)
+        elif (line[0:3] == "lhu"):
+            line = line.replace(")", "")  # remove the ) paran entirely.
+            line = line.replace("(", ",")  # replace ( left paren with comma
+            line = line.replace("lhu", "")
+            line = line.split(
+                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
+            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
+            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
+            rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
+            f.write(str('100101') + str(rs) + str(rt) + str(imm) + '\n')
+            currentline += 1
+        elif (line[0:3] == "lui"):
+            line = line.replace(")", "")  # remove the ) paran entirely.
+            line = line.replace("(", ",")  # replace ( left paren with comma
+            line = line.replace("lui", "")
+            line = line.split(
+                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
+            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
+            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
+
+            f.write(str('001111') + str('00000') + str(rt) + str(imm) + '\n')
+            currentline += 1
+
+        # = = = = SB = = = = = = = = = (I)
         # = = = = LB = = = = = = = = = (I)
         elif (line[0:2] == "lb"):
             line = line.replace(")", "")  # remove the ) paran entirely.
@@ -468,6 +599,21 @@ def main():
             rt = format(int(line[2]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
             f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('101010') + '\n')
             currentline += 1
+
+
+        # = = = = COMP = = = = = = (I)
+        elif (line[0:4] == "comp"):
+            line = line.replace("comp", "")  # delete the addiu from the string.
+            line = line.split(
+                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
+            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
+            rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
+            imm = format(0, '016b')
+            f.write(str('011011') + str(rs) + str(rt) + str(imm) + '\n')
+            currentline += 1
+
+
+
 
         # = = = = JUMP = = = = = = (J)
 
