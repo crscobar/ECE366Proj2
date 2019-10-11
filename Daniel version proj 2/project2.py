@@ -94,16 +94,27 @@ def sim(program):
                     finished = False
 
 
-        #srl
+                  # srl
         elif fetch[0:6] == '000000' and fetch[26:32] == '000010':  # SRL
             PC += 4
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)
             rd = int(fetch[16:21], 2)
-            sh = int(fetch[21:26],2)
+            sh = int(fetch[21:26], 2)
             print(register[sh])
             print(register[rt])
-            register[rd] = int(register[rt]/2**sh)
+            register[rd] = int(register[rt] / 2 ** sh)
+            print(register[rd])
+            # srl
+        elif fetch[0:6] == '000000' and fetch[26:32] == '000000':  # Sll
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+            sh = int(fetch[21:26], 2)
+            print(register[sh])
+            print(register[rt])
+            register[rd] = int(register[rt] * (2 ** sh))
             print(register[rd])
 
         #lw
@@ -441,6 +452,14 @@ def main():
             rt = format(int(line[1]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
             sh = format(int(line[2]), '05b')  # make element 3 in the set, 'line' an int of 5 bits. (sh)
             f.write(str('000000') + str('00000') + str(rt) + str(rd) + str(sh) + str('000010') + '\n')
+            currentline += 1
+        elif (line[0:3] == "sll"):
+            line = line.replace("sll", "")
+            line = line.split(",")
+            rd = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
+            rt = format(int(line[1]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
+            sh = format(int(line[2]), '05b')  # make element 3 in the set, 'line' an int of 5 bits. (sh)
+            f.write(str('000000') + str('00000') + str(rt) + str(rd) + str(sh) + str('000000') + '\n')
             currentline += 1
             # question about splitting in python for the paranthesees?
 
