@@ -269,24 +269,22 @@ def sim(program):
         #
             #if rs has 5 ones in a row then rt equals 1
             #else rt equal 0
-       # elif fetch[0:6] == '011011':  #COMP
-        #    PC += 4
-         #   rs = int(fetch[6:11], 2)
-          #  rt = int(fetch[11:16], 2)
-           # test1 = format(248, '08b')
-           # test2 = format(124, '08b')
-           # test3 = format(62, '08b')
-          #  test4 = format(31, '08b')
-          #  if (register[rs] & test1) == test1:
-           #     register[rt] = 1
-           # elif (register[rs] & test2) == test2:
-           #     register[rt] = 1
-           # elif (register[rs] & test3) == test3:
-           #     register[rt] = 1
-           # elif (register[rs] & test4) == test4:
-            #    register[rt] = 1
-           # else:
-            #    register[rt] = 0
+        elif fetch[0:6] == '011011':  #COMP
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+
+
+            if (register[rs] & 248) == 248:
+                register[rt] = 1
+            elif (register[rs] & 124) == 124:
+                register[rt] = 1
+            elif (register[rs] & 62) == 62:
+                register[rt] = 1
+            elif (register[rs] & 31) == 31:
+                register[rt] = 1
+            else:
+                register[rt] = 0
 #
 
         else:
@@ -353,7 +351,7 @@ def main():
     labelIndex = []
     labelName = []
     f = open("mc1.txt", "w+")
-    h = open("Project1Dan.asm", "r")
+    h = open("Hash-Mips-Plus.asm", "r")
     asm = h.readlines()
     currentline = 0;
     for item in range(asm.count('\n')):  # Remove all empty lines '\n'
