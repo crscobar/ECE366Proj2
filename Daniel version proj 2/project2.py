@@ -164,8 +164,8 @@ def sim(program):
             offset = offset + register[rs]
             register[rt] = mem[offset]
 
-            # LBU
-        elif fetch[0:6] == '100101':  # LhU (I) || Bugged?
+        # LHU
+        elif fetch[0:6] == '100101':  # LHU (I) || Bugged?
             PC += 4
             rs = int(fetch[6:11], 2)
             rt = int(fetch[11:16], 2)

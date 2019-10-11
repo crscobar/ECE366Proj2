@@ -62,14 +62,14 @@ def sim(program):
             register[24] = int(tempLo)
             register[25] = int(tempHi)
 
-                # MFHI
-        elif fetch[0:6] == '000000' and fetch[21:32] == '00000010000':  # MFHI (R) || WORKING
+        # MFHI
+        elif fetch[0:6] == '000000' and fetch[21:32] == '00000010000':   # MFHI (R) || WORKING
             PC += 4
-            rs = int(fetch[6:11], 2)
-            rt = int(fetch[11:16], 2)
-            rd = int(fetch[16:21], 2)
+            rs = int(fetch[6:11],2)
+            rt = int(fetch[11:16],2)
+            rd = int(fetch[16:21],2)
 
-            register[rd] = register[25]  # register 2 saved for hi
+            register[rd] = register[25]   # register 2 saved for hi
 
         # MFLO
         elif fetch[0:6] == '000000' and fetch[21:32] == '00000010010':   # MFLO (R) || WORKING
@@ -128,6 +128,16 @@ def sim(program):
 
             register[rt] = mem[imm]
 
+        # LHU
+        elif fetch[0:6] == '100101':  # LHU (I) || ???
+            PC += 4
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            imm = int(fetch[16:], 2)
+            imm = imm + register[rs]
+
+            register[rt] = mem[imm] & 65535
+
         # ANDI
         elif fetch[0:6] == '001100':  # ANDI (I) || WORKING
             PC += 4
@@ -183,25 +193,8 @@ def sim(program):
             rt = int(fetch[11:16], 2)
             imm = int(fetch[16:], 2)
             imm = imm + register[rs]
-            register[rt] = (mem[imm]) & 255
-            # LBU
 
-            # LBU
-        elif fetch[0:6] == '100101'  # LhU (I) || Bugged?
-            PC += 4
-            rs = int(fetch[6:11], 2)
-            rt = int(fetch[11:16], 2)
-            imm = int(fetch[16:], 2)
-            imm = imm + register[rs]
-            register[rt] = (mem[imm]) & 65535
-            # LBU
-        elif fetch[0:6] == '100100':  # LBU (I) || Bugged?
-            PC += 4
-            rs = int(fetch[6:11], 2)
-            rt = int(fetch[11:16], 2)
-            imm = int(fetch[16:], 2)
-            imm = imm + register[rs]
-            register[rt] = (mem[imm]) & 255
+            register[rt] = mem[imm] & 255
 
         # BEQ
         elif fetch[0:6] == '000100':  # BEQ (I) || GIVEN
@@ -243,26 +236,28 @@ def sim(program):
 
     # Finished simulations. Let's print out some stats
     print('***Simulation finished***')
-
-    print('Registers $0 - $7  [0  1  2  3  4  5  6  7]')
-    print('Registers $0 - $7 ', register[0:8])
-
-    print('--------------------------------------------')
-
-    print('Registers $8 - $23  [8  9  10  11  12  13  14  15  16  17  18  19  20  21  22  23]')
-    print('Registers $8 - $23 ', register[8:24])
-
-    print('-----------------------------------------------------------------------------------')
-
-    print('Registers lo, hi, pc  [lo  hi  pc]')
-    print('Registers lo, hi, pc ', register[24:27])
     
-    print('----------------------------------')
+    print('                   _______________________________________________________________________________________')
+    print('Registers $0 - $7: | {}[$0] | {}[$1] | {}[$2] | {}[$3] | {}[$4] | {}[$5] | {}[$6] | {}[$7] |' .format(register[0], register[1], register[2], register[3], register[4], register[5], register[6], register[7]))
+    print('                   ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
 
+    print('                    ______________________________________________________________________________________')
+    print('Registers $8 - $15: | {}[$8] | {}[$9] | {}[$10] | {}[$11] | {}[$12] | {}[$13] | {}[$14] | {}[$15] |' .format(register[8], register[9], register[10], register[11], register[12], register[13], register[14], register[15]))
+    print('                    ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
 
-    #print('Label Mem? 0x0 - 0x2000 ', mem[0:8192])
+    print('                     _____________________________________________________________________________________')
+    print('Registers $16 - $23: | {}[$16] | {}[$17] | {}[$18] | {}[$19] | {}[$20] | {}[$21] | {}[$22] | {}[$23] |' .format(register[16], register[17], register[18], register[19], register[20], register[21], register[22], register[23]))
+    print('                     ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
+
+    print('                      __________________________________')
+    print('Registers lo, hi, PC: | {}[lo] | {}[$hi] | {}[$pc] |' .format(register[24], register[25], register[26]))
+    print('                      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
+
+    print('Dynamic Instr Count ', DIC)
+    print('Memory contents 0x2000 - 0x20FF ', mem[8192:8448])
 
     input()
+
 
 
 #----- MIPS File to MC Converter (HW4) ------#
@@ -409,18 +404,6 @@ def main():
             f.write(str('000000') + str('00000') + str(rt) + str(rd) + str(sh) + str('000010') + '\n')
             currentline += 1
             # question about splitting in python for the paranthesees?
-            # = = = = LB = = = = = = = = = (I)
-        elif (line[0:3] == "lbu"):
-            line = line.replace(")", "")  # remove the ) paran entirely.
-            line = line.replace("(", ",")  # replace ( left paren with comma
-            line = line.replace("lbu", "")
-            line = line.split(
-                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
-            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
-            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
-            rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
-            f.write(str('100100') + str(rs) + str(rt) + str(imm) + '\n')
-            currentline += 1
 
         # = = = = LB = = = = = = = = = (I)
         elif (line[0:2] == "lb"):
@@ -433,30 +416,6 @@ def main():
             imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
             rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             f.write(str('100000') + str(rs) + str(rt) + str(imm) + '\n')
-            currentline += 1
-
-            # = = = = LB = = = = = = = = = (I)
-        elif (line[0:3] == "lhu"):
-            line = line.replace(")", "")  # remove the ) paran entirely.
-            line = line.replace("(", ",")  # replace ( left paren with comma
-            line = line.replace("lhu", "")
-            line = line.split(
-                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
-            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
-            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
-            rs = format(int(line[2]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
-            f.write(str('100101') + str(rs) + str(rt) + str(imm) + '\n')
-            currentline += 1
-        elif (line[0:3] == "lui"):
-            line = line.replace(")", "")  # remove the ) paran entirely.
-            line = line.replace("(", ",")  # replace ( left paren with comma
-            line = line.replace("lui", "")
-            line = line.split(
-                ",")  # split the 1 string 'line' into a string array of many strings, broken at the comma.
-            rt = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rt)
-            imm = format(int(line[1]), '016b') if (int(line[1]) >= 0) else format(65536 + int(line[1]), '016b')
-
-            f.write(str('001111') + str('00000') + str(rt) + str(imm) + '\n')
             currentline += 1
 
         # = = = = SB = = = = = = = = = (I)
