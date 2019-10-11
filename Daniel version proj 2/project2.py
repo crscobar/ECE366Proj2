@@ -114,8 +114,18 @@ def sim(program):
             sh = int(fetch[21:26], 2)
             print(register[sh])
             print(register[rt])
-            register[rd] = int(register[rt] * (2 ** sh))
-            print(register[rd])
+            temp = int(register[rt] * (2 ** sh))
+
+
+            if (temp > 4294967295):
+                temp = hex(temp)  # with multiple conversions
+                tempLen = len(temp)
+                bitsWant = tempLen - 8
+                tt = temp[bitsWant:tempLen]
+                i = int(tt, 16)
+                register[rd] = i
+            else:
+                register[rd] = temp
 
         #lw
         elif fetch[0:6] == '100011':  # LW
@@ -310,7 +320,7 @@ def sim(program):
     print('                      ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
 
     print('Dynamic Instr Count ', DIC)
-    print('Memory contents 0x2000 - 0x20FF ', mem[8192:8448])
+    print('Memory contents 0x2000 - 0x20FF ', mem[8192:8624])
 
     input()
 
