@@ -116,12 +116,16 @@ def sim(program):
             sh = int(fetch[21:26], 2)
 
             temp = int(register[rt]*(2**(sh)))      # fixing overbounds hex/decimal issue 
-            temp = hex(temp)                        # with multiple conversions
-            tempLen = len(temp)                     
-            bitsWant = tempLen - 8
-            tt = temp[bitsWant:tempLen]
-            i = int(tt, 16)
-            register[rd] = i
+            
+            if(temp > 4294967295):
+                temp = hex(temp)                        # with multiple conversions
+                tempLen = len(temp)                     
+                bitsWant = tempLen - 8
+                tt = temp[bitsWant:tempLen]
+                i = int(tt, 16)
+                register[rd] = i
+            else:
+                register[rd] = temp
 
 
         # SW
