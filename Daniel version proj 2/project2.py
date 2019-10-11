@@ -13,7 +13,8 @@ def sim(program):
     while (not (finished)):
         if PC == len(program) - 4:
             finished = True
-            register[26] = PC
+            register[26] = PC + 4
+
         fetch = program[PC]
         DIC += 1
         # print(hex(int(fetch,2)), PC)
@@ -134,7 +135,7 @@ def sim(program):
             rt = int(fetch[11:16], 2)
             imm = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
 
-            register[rt] = mem[rs + imm]
+            register[rt] = mem[register[rs] + imm]
 
         #andi
         elif fetch[0:6] == '001100':  # ANDI
@@ -148,7 +149,8 @@ def sim(program):
             print(register[rt])
             #Jacob's Part
 
-        #sltu
+
+                # sltu
         elif fetch[0:6] == '000000' and fetch[26:32] == '101011':  # SLTU
             PC += 4
             rs = int(fetch[6:11], 2)
@@ -159,15 +161,18 @@ def sim(program):
                 register[rd] = 1
             else:
                 register[rd] = 0
-           
-        #lw            
-        elif fetch[0:6] == '100011':  #LW
+
+                # slt
+        elif fetch[0:6] == '000000' and fetch[26:32] == '101010':  # SLT
             PC += 4
-            s = int(fetch[6:11], 2)
-            t = int(fetch[11:16], 2)
-            offset = -(65536 - int(fetch[16:], 2)) if fetch[16] == '1' else int(fetch[16:], 2)
-            offset = offset + register[s]
-            register[t] = mem[offset]
+            rs = int(fetch[6:11], 2)
+            rt = int(fetch[11:16], 2)
+            rd = int(fetch[16:21], 2)
+
+            if register[rs] < register[rt]:
+                register[rd] = 1
+            else:
+                register[rd] = 0
 
         #and
         elif fetch[0:6] == '000000' and fetch[26:32] == '100100':  #AND
@@ -655,11 +660,9 @@ def main():
             rd = format(int(line[0]), '05b')  # make element 0 in the set, 'line' an int of 5 bits. (rd)
             rs = format(int(line[1]), '05b')  # make element 1 in the set, 'line' an int of 5 bits. (rs)
             rt = format(int(line[2]), '05b')  # make element 2 in the set, 'line' an int of 5 bits. (rt)
-            for i in range(len(labelName)):
-                if (labelName[i] == line[0]):
-                    f.write(str('000101') + str(rs) + str(rt) + str(format(int(labelIndex[i]), '016b')) + '\n')
+            f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('101011') + '\n')
             currentline += 1
-            # f.write(str('000000') + str(rs) + str(rt) + str(rd) + str('00000') + str('101011') + '\n')
+
 
 
         # = = = = SLT = = = = = = = = = (R)
